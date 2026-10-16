@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyCloud Mini</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;background:#101827;color:white;max-width:600px;margin:30px auto;padding:16px}
+main{background:#1e293b;padding:20px;border-radius:14px}
+input,button{box-sizing:border-box;width:100%;padding:12px;margin:7px 0;border-radius:7px}
+button{background:#38bdf8;border:0;font-weight:bold}
+input{background:#fff;border:1px solid #ccc}
+small{color:#cbd5e1}
+li{margin:14px 0;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<h1>☁️ MyCloud Mini</h1>
+<main>
+<h3>Your personal cloud</h3>
+<input id="email" type="email" placeholder="Email address">
+<input id="password" type="password" placeholder="Password (6+ characters)">
+<button onclick="signup()">Create account</button>
+<button onclick="login()">Login</button>
+<button onclick="logout()">Logout</button>
+<hr>
+<p id="status">Please log in or create an account.</p>
+<input id="file" type="file">
+<button onclick="uploadFile()">Upload file</button>
+<button onclick="loadFiles()">Refresh files</button>
+<ul id="files"></ul>
+<small>Learning prototype — do not upload sensitive files.</small>
+</main>
+<script>
+const db = supabase.createClient(
+  "https://nylpeijudbjzocdfiyqe.supabase.co",
+  "sb_publishable_CPIurg7CNQRL2yVyyGb0cA_iQp5Sk21"
+);
+let user = null;
+
+async function init(){
+  const {data} = await db.auth.getSession();
+  user = data.session?.user || null;
+  showUser();
+  if(user) await loadFiles();
+}
+function showUser(){
+  document.getElementById("status").textContent =
+    user ? "Logged in: " + user.email :
+    "Please log in or create an account.";
+}
+async function signup(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const {data,error} = await db.auth.signUp({email,password});
+  if(error) return alert(error.message);
+  user = data.session?.user || null;
+  showUser();
+  if(user) await loadFiles();
+  else alert("Check your email to confirm your account, then log in.");
+}
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const {data,error} = await db.auth.signInWithPassword({email,password});
+  if(error) return alert(error.message);
+  user = data.user;
+  showUser();
+  await loadFiles();
+}
+async function logout(){
+  const {error} = await db.auth.signOut();
+  if(error) return alert(error.message);
+  user = null;
+  document.getElementById("files").innerHTML = "";
+  showUser();
+}
+async function uploadFile(){
+  if(!user) return alert("Please log in first.");
+  const file = document.getElementById("file").files[0];
+  if(!file) return alert("Choose a file first.");
+  const safeName = file.name.replace(/[^\w.\- ]/g,"_");
+  const path = user.id + "/" + Date.now() + "_" + safeName;
+  const {error} = await db.storage.from("user-files")
+    .upload(path,file);
+  if(error) return alert(error.message);
+  alert("Upload successful!");
+  document.getElementById("file").value = "";
+  await loadFiles();
+}
+async function loadFiles(){
+  if(!user) return alert("Please log in first.");
+  const {data,error} = await db.storage.from("user-files")
+    .list(user.id,{limit:100,sortBy:{column:"name",order:"desc"}});
+  if(error) return alert(error.message);
+  const list = document.getElementById("files");
+  list.innerHTML = "";
+  for(const file of (data || [])){
+    if(!file.id) continue;
+    const li = document.createElement("li");
+    li.append(document.createTextNode(file.name + " "));
+    const btn = document.createElement("button");
+    btn.textContent = "Download";
+    btn.onclick = async () => {
+      const {data,error} = await db.storage.from("user-files")
+        .download(user.id + "/" + file.name);
+      if(error) return alert(error.message);
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url),1000);
+    };
+    li.append(btn);
+    list.append(li);
+  }
+}
+init();
+</script>
+</body>
+</html>
