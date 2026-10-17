@@ -1,470 +1,385 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MyCloud Mini</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,sans-serif}
-:root{color-scheme:dark;--bg:#080d1c;--panel:#111a30;--blue:#38bdf8;--purple:#818cf8;--text:#edf4ff;--muted:#9aa9c7}
-body{min-height:100vh;background:radial-gradient(ellipse at 10% 10%,#123354 0,transparent 35%),radial-gradient(ellipse at 90% 20%,#28205b 0,transparent 35%),var(--bg);color:var(--text);padding:25px 12px}
-button,input{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.55;cursor:wait}
-.app{width:100%;max-width:850px;margin:auto;background:rgba(15,24,44,.94);border:1px solid #283955;border-radius:24px;padding:25px;box-shadow:0 20px 70px #0008,0 0 35px #38bdf812}
-header{display:flex;align-items:center;gap:13px;margin-bottom:8px}
-.logo{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:25px}
-h1{font-size:25px;letter-spacing:-.7px}
-.subtitle{color:var(--muted);font-size:13px;margin:7px 0 24px}
-h2{font-size:18px;margin-bottom:14px}
-input{width:100%;padding:13px 14px;margin:7px 0;border-radius:12px;border:1px solid #344361;background:#080f20;color:var(--text);outline:none}
-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #38bdf820}
-input::placeholder{color:#7f90ad}
-.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;transition:.2s}
-.primary{background:linear-gradient(110deg,#0ea5e9,#635bdb);color:white}
-.primary:hover{filter:brightness(1.12);transform:translateY(-1px)}
-.ghost{background:#202d46;color:#e5edff;border:1px solid #344361}
-.full{width:100%;margin-top:8px}
-.hidden{display:none!important}
-.auth{max-width:440px;margin:15px auto}
-.note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:12px}
-.userbar{display:flex;align-items:center;gap:12px;padding:13px;background:#14233b;border:1px solid #2c4664;border-radius:16px;margin-bottom:20px}
-.avatar{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--purple));font-weight:800}
-.userinfo{flex:1;min-width:0}
-.username{font-weight:700;overflow-wrap:anywhere}
-.email{font-size:12px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
-.logout{border:1px solid #693448;color:#fda4af;background:#351c2c;padding:9px 12px;border-radius:10px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.stat{padding:16px;background:#0c1528;border:1px solid #253650;border-radius:15px;min-width:0}
-.stat small{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
-.stat strong{font-size:20px;overflow-wrap:anywhere}
-.dropzone{padding:28px 15px;text-align:center;border:1.5px dashed #41648c;background:#0c1a2d;border-radius:17px;cursor:pointer;margin-bottom:10px;transition:.2s}
-.dropzone:hover,.dropzone.over{border-color:var(--blue);background:#112941}
-.dropicon{font-size:34px;margin-bottom:8px}
-.dropzone p{font-size:13px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
-.cyan{color:#7dd3fc;font-weight:700}
-.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 12px}
-.toolbar input{flex:1;min-width:160px;margin:0}
-.toolbar select{padding:11px;border:1px solid #344361;background:#0b1426;color:var(--text);border-radius:11px}
-.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 10px}
-.section-title h2{margin:0}
-.file-list{display:grid;grid-template-columns:1fr;gap:9px}
-.file-item{display:flex;align-items:center;gap:12px;padding:13px;background:#0c1528;border:1px solid #253650;border-radius:14px;min-width:0}
-.file-icon{font-size:25px}
-.file-meta{flex:1;min-width:0}
-.file-name{font-size:13px;font-weight:700;overflow-wrap:anywhere}
-.file-sub{font-size:11px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}
-.file-actions{display:flex;gap:6px;flex-wrap:wrap}
-.mini{border:0;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:700}
-.download{background:#12344a;color:#7dd3fc}
-.delete{background:#3b202c;color:#fda4af}
-.empty{text-align:center;color:var(--muted);padding:25px 10px;border:1px dashed #344361;border-radius:14px;font-size:13px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,100px);opacity:0;transition:.25s;background:#101c30;border:1px solid #3b5575;border-radius:12px;padding:13px 18px;width:max-content;max-width:90%;z-index:10;font-size:13px;overflow-wrap:anywhere}
-.toast.show{transform:translate(-50%,0);opacity:1}
-.toast.error{border-color:#fb7185;color:#fecdd3}
-.toast.success{border-color:#4ade80;color:#bbf7d0}
-footer{text-align:center;color:#71809d;font-size:11px;margin-top:22px}
-@media(min-width:650px){.file-list.grid{grid-template-columns:1fr 1fr}}
-@media(max-width:480px){.app{padding:17px;border-radius:19px}h1{font-size:22px}.stats{gap:7px}.stat{padding:11px}.stat strong{font-size:17px}.file-item{gap:8px;padding:10px}.file-actions{flex-direction:column}.mini{padding:8px}.userbar{gap:8px}}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+body {
+  min-height:100vh;
+  background: linear-gradient(135deg,#0f172a,#1e1b4b,#0f172a);
+  background-size: 200% 200%;
+  animation: bgMove 12s ease infinite;
+  color:#e2e8f0;
+  display:flex; justify-content:center;
+  padding:24px 14px;
+}
+@keyframes bgMove { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.card {
+  width:100%; max-width:480px;
+  background: rgba(30,41,59,.65);
+  backdrop-filter: blur(18px);
+  border:1px solid rgba(148,163,184,.15);
+  border-radius:24px;
+  padding:28px 24px;
+  height:fit-content;
+  box-shadow: 0 25px 60px rgba(0,0,0,.45);
+}
+.logo { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.logo-icon {
+  width:44px; height:44px; border-radius:14px;
+  background: linear-gradient(135deg,#38bdf8,#818cf8);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+h1 { font-size:24px; font-weight:800; letter-spacing:-.5px; }
+.sub { color:#94a3b8; font-size:13px; margin-bottom:20px; }
+input {
+  width:100%; padding:13px 16px; margin:6px 0;
+  background:rgba(15,23,42,.7);
+  border:1px solid rgba(148,163,184,.2);
+  border-radius:12px; color:#e2e8f0; font-size:14px;
+  outline:none; transition:.2s;
+}
+input:focus { border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.15); }
+input::placeholder { color:#64748b; }
+.btn {
+  width:100%; padding:13px; margin:6px 0;
+  border:none; border-radius:12px;
+  font-size:14px; font-weight:700; cursor:pointer;
+  transition:.2s;
+}
+.btn-primary { background:linear-gradient(135deg,#38bdf8,#6366f1); color:#fff; }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(56,189,248,.35); }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.btn-ghost { background:rgba(148,163,184,.12); color:#cbd5e1; }
+.btn-ghost:hover { background:rgba(148,163,184,.22); }
+.divider { height:1px; background:rgba(148,163,184,.15); margin:18px 0; }
+.userbar {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; margin-bottom:16px;
+  background:rgba(56,189,248,.08);
+  border:1px solid rgba(56,189,248,.2);
+  border-radius:14px;
+}
+.avatar {
+  width:38px; height:38px; border-radius:50%;
+  background:linear-gradient(135deg,#38bdf8,#818cf8);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; color:#fff; font-size:16px;
+  flex-shrink:0;
+}
+.user-info { flex:1; min-width:0; }
+.user-name { font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-email { font-size:12px; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.icon-btn {
+  background:rgba(248,113,113,.12); color:#f87171;
+  border:none; padding:8px 12px; border-radius:10px;
+  font-size:12px; font-weight:700; cursor:pointer;
+}
+.dropzone {
+  border:2px dashed rgba(148,163,184,.3);
+  border-radius:16px; padding:28px 16px;
+  text-align:center; cursor:pointer;
+  transition:.2s; margin-bottom:12px;
+}
+.dropzone:hover, .dropzone.over {
+  border-color:#38bdf8;
+  background:rgba(56,189,248,.07);
+}
+.dropzone .dz-icon { font-size:34px; margin-bottom:6px; }
+.dropzone p { font-size:13px; color:#94a3b8; }
+.dropzone .dz-file { color:#38bdf8; font-weight:600; }
+.file-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; margin:8px 0;
+  background:rgba(15,23,42,.5);
+  border:1px solid rgba(148,163,184,.12);
+  border-radius:14px;
+}
+.file-icon { font-size:22px; flex-shrink:0; }
+.file-meta { flex:1; min-width:0; }
+.file-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.file-sub { font-size:11px; color:#64748b; margin-top:2px; }
+.file-actions { display:flex; gap:6px; flex-shrink:0; }
+.mini-btn {
+  border:none; padding:7px 10px; border-radius:9px;
+  font-size:12px; font-weight:700; cursor:pointer; transition:.2s;
+}
+.mini-dl { background:rgba(56,189,248,.15); color:#38bdf8; }
+.mini-dl:hover { background:rgba(56,189,248,.28); }
+.mini-del { background:rgba(248,113,113,.13); color:#f87171; }
+.mini-del:hover { background:rgba(248,113,113,.26); }
+.empty { text-align:center; color:#475569; font-size:13px; padding:20px 0; }
+.toast {
+  position:fixed; left:50%; bottom:28px;
+  transform:translateX(-50%) translateY(100px);
+  background:#0f172a; color:#e2e8f0;
+  border:1px solid rgba(148,163,184,.25);
+  padding:12px 22px; border-radius:14px;
+  font-size:14px; font-weight:600;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:99; max-width:90%;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.error { border-color:#f87171; color:#fca5a5; }
+.toast.success { border-color:#4ade80; color:#86efac; }
+.hidden { display:none; }
+footer { text-align:center; margin-top:18px; font-size:11px; color:#475569; }
 </style>
 </head>
-
 <body>
-<main class="app">
-  <header>
-    <div class="logo">☁️</div>
-    <div><h1>MyCloud Mini</h1><div style="font-size:12px;color:#9aa9c7;margin-top:4px">Your personal cloud workspace</div></div>
-  </header>
-  <p class="subtitle">Store, organize and access your files from anywhere.</p>
 
-  <section id="authSection" class="auth">
-    <h2>Welcome to your cloud</h2>
-    <input id="name" type="text" placeholder="Your name (for new account)" autocomplete="name">
-    <input id="email" type="email" placeholder="Email address" autocomplete="email">
-    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-    <button id="signupBtn" class="btn primary full" type="button">Create account</button>
-    <button id="loginBtn" class="btn ghost full" type="button">Login</button>
-    <p class="note">Existing account? Enter your email and password, then tap Login. New accounts may require email confirmation.</p>
-  </section>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">☁️</div>
+    <div>
+      <h1>MyCloud Mini</h1>
+    </div>
+  </div>
+  <p class="sub">Your personal cloud — store &amp; share files securely</p>
 
-  <section id="appSection" class="hidden">
+  <!-- AUTH SECTION -->
+  <div id="authSection">
+    <input id="name" type="text" placeholder="Your name">
+    <input id="email" type="email" placeholder="Email address">
+    <input id="password" type="password" placeholder="Password (6+ characters)">
+    <button class="btn btn-primary" id="signupBtn" onclick="signup()">Create account</button>
+    <button class="btn btn-ghost" onclick="login()">Login</button>
+  </div>
+
+  <!-- APP SECTION -->
+  <div id="appSection" class="hidden">
     <div class="userbar">
       <div class="avatar" id="avatar">?</div>
-      <div class="userinfo"><div id="userName" class="username">User</div><div id="userEmail" class="email"></div></div>
-      <button id="logoutBtn" class="logout" type="button">Logout</button>
+      <div class="user-info">
+        <div class="user-name" id="userName">—</div>
+        <div class="user-email" id="userEmail">—</div>
+      </div>
+      <button class="icon-btn" onclick="logout()">Logout</button>
     </div>
 
-    <div class="stats">
-      <div class="stat"><small>Total files</small><strong id="fileCount">0</strong></div>
-      <div class="stat"><small>Storage used</small><strong id="storageUsed">0 B</strong></div>
-      <div class="stat"><small>Account</small><strong style="font-size:15px">Active</strong></div>
+    <div class="dropzone" id="dropzone">
+      <div class="dz-icon">📤</div>
+      <p id="dzText">Drag &amp; drop a file here<br>or <span class="dz-file">tap to browse</span></p>
     </div>
+    <input id="file" type="file" class="hidden">
+    <button class="btn btn-primary" id="uploadBtn" onclick="uploadFile()">Upload file</button>
+    <button class="btn btn-ghost" onclick="loadFiles()">🔄 Refresh files</button>
 
-    <div id="dropzone" class="dropzone">
-      <div class="dropicon">📤</div>
-      <p><span class="cyan">Click to choose a file</span> or drag and drop it here</p>
-      <p id="dzText">Your selected file will appear here.</p>
-    </div>
-    <input id="fileInput" type="file" class="hidden">
-    <button id="uploadBtn" class="btn primary full" type="button">Upload file</button>
+    <div class="divider"></div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:6px;">YOUR FILES</p>
+    <div id="files"></div>
+  </div>
 
-    <div class="section-title"><h2>Your files</h2><button id="refreshBtn" class="btn ghost" type="button">↻ Refresh</button></div>
-    <div class="toolbar">
-      <input id="searchInput" type="search" placeholder="Search your files...">
-      <select id="sortSelect" aria-label="Sort files">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-        <option value="name">Name A–Z</option>
-        <option value="size">Largest first</option>
-      </select>
-      <button id="viewBtn" class="btn ghost" type="button">Grid view</button>
-    </div>
-    <div id="files" class="file-list"></div>
-  </section>
+  <footer>Learning prototype — do not upload sensitive files.</footer>
+</div>
 
-  <footer>MyCloud Mini · Learning prototype · Avoid uploading sensitive files.</footer>
-</main>
-<div id="toast" class="toast" role="status"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-(() => {
-  "use strict";
+const db = supabase.createClient(
+  "https://nylpeijudbjzocdfiyqe.supabase.co",
+  "sb_publishable_CPIurg7CNQRL2yVyyGb0cA_iQp5Sk21"
+);
+let user = null;
+let selectedFile = null;
 
-  const SUPABASE_URL = "https://nylpeijudbjzocdfiyqe.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_CPIurg7CNQRL2yVyyGb0cA_iQp5Sk21";
-  const BUCKET = "user-files";
-
-  const $ = id => document.getElementById(id);
-  let db = null;
-  let user = null;
-  let files = [];
-  let gridView = false;
-  let toastTimer = null;
-
-  function toast(message, type = "") {
-    const box = $("toast");
-    box.textContent = message;
-    box.className = "toast show " + type;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => box.className = "toast", 4000);
+/* ---------- UI HELPERS ---------- */
+function toast(msg, type){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + (type || "");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = "toast", 3200);
+}
+function showSection(){
+  const loggedIn = !!user;
+  document.getElementById("authSection").classList.toggle("hidden", loggedIn);
+  document.getElementById("appSection").classList.toggle("hidden", !loggedIn);
+  if(loggedIn){
+    const name = user.user_metadata?.full_name || "";
+    const email = user.email || "";
+    document.getElementById("userName").textContent = name || email.split("@")[0];
+    document.getElementById("userEmail").textContent = email;
+    document.getElementById("avatar").textContent = (name || email)[0].toUpperCase();
   }
+}
+function formatBytes(b){
+  if(!b && b !== 0) return "";
+  if(b < 1024) return b + " B";
+  if(b < 1048576) return (b/1024).toFixed(1) + " KB";
+  return (b/1048576).toFixed(1) + " MB";
+}
+function fileEmoji(name){
+  const ext = name.split(".").pop().toLowerCase();
+  if(["jpg","jpeg","png","gif","webp","svg"].includes(ext)) return "🖼️";
+  if(["mp4","mov","avi","mkv"].includes(ext)) return "🎬";
+  if(["mp3","wav","ogg","m4a"].includes(ext)) return "🎵";
+  if(["pdf"].includes(ext)) return "📕";
+  if(["doc","docx","txt","md"].includes(ext)) return "📄";
+  if(["xls","xlsx","csv"].includes(ext)) return "📊";
+  if(["zip","rar","7z","tar","gz"].includes(ext)) return "📦";
+  if(["js","html","css","py","java","json"].includes(ext)) return "💻";
+  return "📁";
+}
+function setUploadBtn(text, disabled){
+  const b = document.getElementById("uploadBtn");
+  b.textContent = text;
+  b.disabled = disabled;
+}
 
-  function errorMessage(error) {
-    return error?.message || "Something went wrong. Please try again.";
+/* ---------- AUTH ---------- */
+async function init(){
+  const {data} = await db.auth.getSession();
+  user = data.session?.user || null;
+  showSection();
+  if(user) await loadFiles();
+}
+async function signup(){
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if(!name) return toast("Please enter your name","error");
+  const btn = document.getElementById("signupBtn");
+  btn.disabled = true; btn.textContent = "Creating account...";
+  const {data,error} = await db.auth.signUp({
+    email, password, options:{data:{full_name:name}}
+  });
+  btn.disabled = false; btn.textContent = "Create account";
+  if(error) return toast(error.message,"error");
+  user = data.session?.user || null;
+  showSection();
+  if(user){ toast("Account created! 🎉","success"); await loadFiles(); }
+  else toast("Check your email to confirm, then log in.","success");
+}
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const {data,error} = await db.auth.signInWithPassword({email,password});
+  if(error) return toast(error.message,"error");
+  user = data.user;
+  showSection();
+  toast("Welcome back! 👋","success");
+  await loadFiles();
+}
+async function logout(){
+  await db.auth.signOut();
+  user = null;
+  document.getElementById("files").innerHTML = "";
+  showSection();
+  toast("Logged out","success");
+}
+
+/* ---------- DROPZONE ---------- */
+const dz = document.getElementById("dropzone");
+const fileInput = document.getElementById("file");
+dz.addEventListener("click", () => fileInput.click());
+dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("over"); });
+dz.addEventListener("dragleave", () => dz.classList.remove("over"));
+dz.addEventListener("drop", e => {
+  e.preventDefault(); dz.classList.remove("over");
+  if(e.dataTransfer.files.length){
+    fileInput.files = e.dataTransfer.files;
+    showSelectedFile();
   }
+});
+fileInput.addEventListener("change", showSelectedFile);
+function showSelectedFile(){
+  selectedFile = fileInput.files[0] || null;
+  document.getElementById("dzText").innerHTML = selectedFile
+    ? 'Selected: <span class="dz-file">' + selectedFile.name + '</span><br>(' + formatBytes(selectedFile.size) + ')'
+    : 'Drag &amp; drop a file here<br>or <span class="dz-file">tap to browse</span>';
+}
 
-  function formatBytes(bytes) {
-    if (!Number.isFinite(Number(bytes))) return "0 B";
-    const n = Number(bytes);
-    if (n < 1024) return n + " B";
-    if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
-    if (n < 1073741824) return (n / 1048576).toFixed(1) + " MB";
-    return (n / 1073741824).toFixed(2) + " GB";
+/* ---------- FILES ---------- */
+async function uploadFile(){
+  if(!user) return toast("Please log in first","error");
+  const file = fileInput.files[0];
+  if(!file) return toast("Choose a file first","error");
+  setUploadBtn("Uploading... ⏳", true);
+  const safeName = file.name.replace(/[^\w.\- ]/g,"_");
+  const path = user.id + "/" + Date.now() + "_" + safeName;
+  const {error} = await db.storage.from("user-files").upload(path, file);
+  setUploadBtn("Upload file", false);
+  if(error) return toast(error.message,"error");
+  toast("Upload successful! 🚀","success");
+  fileInput.value = "";
+  showSelectedFile();
+  await loadFiles();
+}
+async function loadFiles(){
+  if(!user) return;
+  const {data,error} = await db.storage.from("user-files")
+    .list(user.id,{limit:100,sortBy:{column:"created_at",order:"desc"}});
+  if(error) return toast(error.message,"error");
+  const box = document.getElementById("files");
+  box.innerHTML = "";
+  const files = (data || []).filter(f => f.id);
+  if(!files.length){
+    box.innerHTML = '<div class="empty">No files yet — upload your first file! ☁️</div>';
+    return;
   }
-
-  function safeDisplayName(fileName) {
-    // Supports both legacy timestamp_filename and uploader__timestamp_filename.
-    return fileName.replace(/^[^/]+\/?/, "").replace(/^[^_]+__\d+_/, "").replace(/^\d+_/, "");
+  for(const file of files){
+    const row = document.createElement("div");
+    row.className = "file-item";
+    const name = document.createElement("div");
+    name.className = "file-icon";
+    name.textContent = fileEmoji(file.name);
+    const meta = document.createElement("div");
+    meta.className = "file-meta";
+    const fn = document.createElement("div");
+    fn.className = "file-name";
+    fn.textContent = file.name.replace(/^\d+_/, "");
+    const sub = document.createElement("div");
+    sub.className = "file-sub";
+    sub.textContent = formatBytes(file.metadata?.size) + " · " + new Date(file.created_at).toLocaleDateString();
+    meta.append(fn, sub);
+    const actions = document.createElement("div");
+    actions.className = "file-actions";
+    const dl = document.createElement("button");
+    dl.className = "mini-btn mini-dl";
+    dl.textContent = "↓";
+    dl.title = "Download";
+    dl.onclick = () => downloadFile(file.name);
+    const del = document.createElement("button");
+    del.className = "mini-btn mini-del";
+    del.textContent = "✕";
+    del.title = "Delete";
+    del.onclick = () => deleteFile(file.name);
+    actions.append(dl, del);
+    row.append(name, meta, actions);
+    box.append(row);
   }
-
-  function emoji(name) {
-    const ext = name.split(".").pop().toLowerCase();
-    if (["png","jpg","jpeg","gif","webp","svg"].includes(ext)) return "🖼️";
-    if (["mp4","mov","mkv","avi"].includes(ext)) return "🎬";
-    if (["mp3","wav","m4a","ogg"].includes(ext)) return "🎵";
-    if (ext === "pdf") return "📕";
-    if (["doc","docx","txt","md"].includes(ext)) return "📄";
-    if (["xls","xlsx","csv"].includes(ext)) return "📊";
-    if (["zip","rar","7z"].includes(ext)) return "📦";
-    return "📁";
-  }
-
-  function setBusy(button, busy, busyText, normalText) {
-    button.disabled = busy;
-    button.textContent = busy ? busyText : normalText;
-  }
-
-  function showSection() {
-    const loggedIn = Boolean(user);
-    $("authSection").classList.toggle("hidden", loggedIn);
-    $("appSection").classList.toggle("hidden", !loggedIn);
-
-    if (loggedIn) {
-      const email = user.email || "";
-      const name = user.user_metadata?.full_name || email.split("@")[0] || "User";
-      $("userName").textContent = name;
-      $("userEmail").textContent = email;
-      $("avatar").textContent = (name[0] || "U").toUpperCase();
-    }
-  }
-
-  async function login() {
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    if (!email || !password) {
-      toast("Enter your email and password first.", "error");
-      return;
-    }
-    const btn = $("loginBtn");
-    setBusy(btn, true, "Logging in...", "Login");
-    try {
-      if (!db) throw new Error("Supabase did not load. Check your internet and refresh.");
-      const { data, error } = await db.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      if (!data.user) throw new Error("Login did not return a user. Try again.");
-      user = data.user;
-      showSection();
-      toast("Login successful!", "success");
-      await loadFiles();
-    } catch (error) {
-      console.error("Login error:", error);
-      toast(errorMessage(error), "error");
-    } finally {
-      setBusy(btn, false, "Logging in...", "Login");
-    }
-  }
-
-  async function signup() {
-    const name = $("name").value.trim();
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    if (!name || !email || !password) {
-      toast("Enter your name, email and password.", "error");
-      return;
-    }
-    if (password.length < 6) {
-      toast("Password must be at least 6 characters.", "error");
-      return;
-    }
-    const btn = $("signupBtn");
-    setBusy(btn, true, "Creating account...", "Create account");
-    try {
-      if (!db) throw new Error("Supabase did not load. Check your internet and refresh.");
-      const { data, error } = await db.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: name } }
-      });
-      if (error) throw error;
-      if (data.user && data.session) {
-        user = data.user;
-        showSection();
-        toast("Account created successfully!", "success");
-        await loadFiles();
-      } else {
-        toast("Account created. Confirm your email, then log in.", "success");
-      }
-    } catch (error) {
-      console.error("Signup error:", error);
-      toast(errorMessage(error), "error");
-    } finally {
-      setBusy(btn, false, "Creating account...", "Create account");
-    }
-  }
-
-  async function logout() {
-    try {
-      const { error } = await db.auth.signOut();
-      if (error) throw error;
-      user = null;
-      files = [];
-      $("files").replaceChildren();
-      showSection();
-      toast("Logged out.", "success");
-    } catch (error) {
-      toast(errorMessage(error), "error");
-    }
-  }
-
-  async function loadFiles() {
-    if (!user || !db) return;
-    $("files").innerHTML = '<div class="empty">Loading your files...</div>';
-    try {
-      const { data, error } = await db.storage.from(BUCKET).list(user.id, {
-        limit: 100,
-        sortBy: { column: "created_at", order: "desc" }
-      });
-      if (error) throw error;
-
-      files = (data || []).filter(file => file.id && file.name);
-      renderFiles();
-    } catch (error) {
-      console.error("Load files error:", error);
-      $("files").innerHTML = '<div class="empty">Could not load files. Check Storage policies.</div>';
-      toast(errorMessage(error), "error");
-    }
-  }
-
-  function renderFiles() {
-    const box = $("files");
-    box.replaceChildren();
-
-    const query = $("searchInput").value.trim().toLowerCase();
-    const sorted = files.filter(file => safeDisplayName(file.name).toLowerCase().includes(query));
-
-    const sort = $("sortSelect").value;
-    sorted.sort((a, b) => {
-      if (sort === "name") return safeDisplayName(a.name).localeCompare(safeDisplayName(b.name));
-      if (sort === "size") return (b.metadata?.size || 0) - (a.metadata?.size || 0);
-      const aTime = new Date(a.created_at || 0).getTime();
-      const bTime = new Date(b.created_at || 0).getTime();
-      return sort === "oldest" ? aTime - bTime : bTime - aTime;
-    });
-
-    $("fileCount").textContent = files.length;
-    $("storageUsed").textContent = formatBytes(files.reduce((sum, f) => sum + (Number(f.metadata?.size) || 0), 0));
-    box.classList.toggle("grid", gridView);
-
-    if (!sorted.length) {
-      box.innerHTML = '<div class="empty">' + (query ? "No matching files found." : "No files yet. Upload your first file!") + '</div>';
-      return;
-    }
-
-    sorted.forEach(file => {
-      const row = document.createElement("div");
-      row.className = "file-item";
-
-      const icon = document.createElement("div");
-      icon.className = "file-icon";
-      icon.textContent = emoji(safeDisplayName(file.name));
-
-      const meta = document.createElement("div");
-      meta.className = "file-meta";
-
-      const name = document.createElement("div");
-      name.className = "file-name";
-      name.textContent = safeDisplayName(file.name);
-
-      const sub = document.createElement("div");
-      sub.className = "file-sub";
-      const date = file.created_at ? new Date(file.created_at).toLocaleDateString() : "Date unavailable";
-      const uploader = user.user_metadata?.full_name || user.email?.split("@")[0] || "You";
-      sub.textContent = formatBytes(file.metadata?.size) + " · " + date + " · Uploaded by " + uploader;
-
-      meta.append(name, sub);
-
-      const actions = document.createElement("div");
-      actions.className = "file-actions";
-
-      const dl = document.createElement("button");
-      dl.type = "button";
-      dl.className = "mini download";
-      dl.textContent = "↓ Download";
-      dl.addEventListener("click", () => downloadFile(file.name));
-
-      const del = document.createElement("button");
-      del.type = "button";
-      del.className = "mini delete";
-      del.textContent = "✕ Delete";
-      del.addEventListener("click", () => deleteFile(file.name));
-
-      actions.append(dl, del);
-      row.append(icon, meta, actions);
-      box.append(row);
-    });
-  }
-
-  async function uploadFile() {
-    if (!user) {
-      toast("Please log in first.", "error");
-      return;
-    }
-    const input = $("fileInput");
-    const file = input.files?.[0];
-    if (!file) {
-      toast("Choose a file first.", "error");
-      return;
-    }
-
-    const btn = $("uploadBtn");
-    setBusy(btn, true, "Uploading...", "Upload file");
-    try {
-      const safeName = file.name.replace(/[^\w.\- ]/g, "_");
-      const uploader = (user.user_metadata?.full_name || user.email?.split("@")[0] || "user")
-        .trim().replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "") || "user";
-
-      // Keep the UID folder for existing Supabase Storage policies.
-      // The uploader label is included in new object names.
-      const path = user.id + "/" + uploader + "__" + Date.now() + "_" + safeName;
-      const { error } = await db.storage.from(BUCKET).upload(path, file, { upsert: false });
-      if (error) throw error;
-
-      input.value = "";
-      $("dzText").textContent = "Your selected file will appear here.";
-      toast("Upload successful!", "success");
-      await loadFiles();
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast(errorMessage(error), "error");
-    } finally {
-      setBusy(btn, false, "Uploading...", "Upload file");
-    }
-  }
-
-  async function downloadFile(fileName) {
-    try {
-      const { data, error } = await db.storage.from(BUCKET).download(user.id + "/" + fileName);
-      if (error) throw error;
-      const url = URL.createObjectURL(data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = safeDisplayName(fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-    } catch (error) {
-      console.error("Download error:", error);
-      toast(errorMessage(error), "error");
-    }
-  }
-
-  async function deleteFile(fileName) {
-    if (!confirm("Delete this file permanently?")) return;
-    try {
-      const { error } = await db.storage.from(BUCKET).remove([user.id + "/" + fileName]);
-      if (error) throw error;
-      toast("File deleted.", "success");
-      await loadFiles();
-    } catch (error) {
-      console.error("Delete error:", error);
-      toast(errorMessage(error), "error");
-    }
-  }
-
-  function setup() {
-    // Explicit listeners prevent inline onclick/global-scope issues.
-    $("loginBtn").addEventListener("click", login);
-    $("signupBtn").addEventListener("click", signup);
-    $("logoutBtn").addEventListener("click", logout);
-    $("uploadBtn").addEventListener("click", uploadFile);
-    $("refreshBtn").addEventListener("click", loadFiles);
-    $("searchInput").addEventListener("input", renderFiles);
-    $("sortSelect").addEventListener("change", renderFiles);
-    $("viewBtn").addEventListener("click", () => {
-      gridView = !gridView;
-      $("viewBtn").textContent = gridView ? "List view" : "Grid view";
-      renderFiles();
-    });
-
-    const dropzone = $("dropzone");
-    const fileInput = $("fileInput");
-    dropzone.addEventListener("click", () => fileInput.click());
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files?.[0];
-      $("dzText").textContent = file ? file.name + " · " + formatBytes(file.size) : "Your selected file will appear here.";
-    });
-    dropzone.addEventListener("dragover", event => {
-      event.preventDefault();
-      dropzone.classList.add("over");
-    });
-    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("over"));
-    dropzone.addEventListener("drop", event => {
-      event.preventDefault();
-      dropzone.classList.remove("over");
-      const dt = event.dataTransfer;
+}
+async function downloadFile(fileName){
+  const {data,error} = await db.storage.from("user-files")
+    .download(user.id + "/" + fileName);
+  if(error) return toast(error.message,"error");
+  const url = URL.createObjectURL(data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast("Downloading... 📥","success");
+}
+async function deleteFile(fileName){
+  if(!confirm("Delete this file permanently?")) return;
+  const {error} = await db.storage.from("user-files")
+    .remove([user.id + "/" + fileName]);
+  if(error) return toast(error.message,"error");
+  toast("File deleted 🗑️","success");
+  await loadFiles();
+}
+init();
+</script>
+</body>
+  </html>
+  
