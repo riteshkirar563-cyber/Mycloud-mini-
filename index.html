@@ -4,408 +4,467 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MyCloud Mini Pro</title>
+<title>MyCloud Mini</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --bg:#070b16;--panel:#10182a;--panel2:#0b1222;
-  --text:#edf3ff;--muted:#8c9ab5;--blue:#38bdf8;
-  --purple:#8b5cf6;--border:rgba(148,163,184,.15);
-  --danger:#fb7185;--green:#34d399;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,sans-serif}
-body{
-  min-height:100vh;color:var(--text);
-  background:radial-gradient(ellipse at 10% 0%,#172554 0,transparent 40%),
-  radial-gradient(ellipse at 100% 20%,#30134e 0,transparent 35%),var(--bg);
-}
-button,input,select{font:inherit}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,sans-serif}
+:root{color-scheme:dark;--bg:#080d1c;--panel:#111a30;--blue:#38bdf8;--purple:#818cf8;--text:#edf4ff;--muted:#9aa9c7}
+body{min-height:100vh;background:radial-gradient(ellipse at 10% 10%,#123354 0,transparent 35%),radial-gradient(ellipse at 90% 20%,#28205b 0,transparent 35%),var(--bg);color:var(--text);padding:25px 12px}
+button,input{font:inherit}
 button{cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
+button:disabled{opacity:.55;cursor:wait}
+.app{width:100%;max-width:850px;margin:auto;background:rgba(15,24,44,.94);border:1px solid #283955;border-radius:24px;padding:25px;box-shadow:0 20px 70px #0008,0 0 35px #38bdf812}
+header{display:flex;align-items:center;gap:13px;margin-bottom:8px}
+.logo{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:25px}
+h1{font-size:25px;letter-spacing:-.7px}
+.subtitle{color:var(--muted);font-size:13px;margin:7px 0 24px}
+h2{font-size:18px;margin-bottom:14px}
+input{width:100%;padding:13px 14px;margin:7px 0;border-radius:12px;border:1px solid #344361;background:#080f20;color:var(--text);outline:none}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #38bdf820}
+input::placeholder{color:#7f90ad}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;transition:.2s}
+.primary{background:linear-gradient(110deg,#0ea5e9,#635bdb);color:white}
+.primary:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.ghost{background:#202d46;color:#e5edff;border:1px solid #344361}
+.full{width:100%;margin-top:8px}
 .hidden{display:none!important}
-.app{width:min(1200px,100%);margin:auto;padding:25px 18px 50px}
-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:28px}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-icon{
- width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
- font-size:25px;background:linear-gradient(135deg,var(--blue),var(--purple));
- box-shadow:0 0 28px #38bdf833
-}
-h1{font-size:22px;letter-spacing:-.7px}
-.brand small{color:var(--muted);font-size:12px}
-.badge{font-size:11px;color:#a5f3fc;border:1px solid #38bdf844;padding:7px 10px;border-radius:30px}
-.panel{
- background:linear-gradient(145deg,rgba(20,30,52,.92),rgba(10,16,31,.94));
- border:1px solid var(--border);border-radius:22px;padding:23px;
- box-shadow:0 20px 60px #0003;backdrop-filter:blur(16px)
-}
-.auth{max-width:440px;margin:55px auto}
-.auth h2{font-size:25px;margin-bottom:7px}
-.muted{color:var(--muted);font-size:13px;line-height:1.6}
-.field{width:100%;margin-top:13px;padding:13px 14px;border-radius:12px;
- color:var(--text);background:#080f1f;border:1px solid var(--border);outline:none}
-.field:focus{border-color:var(--blue);box-shadow:0 0 0 3px #38bdf81a}
-.btn{border:0;border-radius:11px;padding:11px 14px;font-size:12px;font-weight:700;transition:.2s}
-.btn:hover{transform:translateY(-1px)}
-.primary{color:white;background:linear-gradient(120deg,#0ea5e9,#6d5dfc);box-shadow:0 5px 20px #6366f133}
-.secondary{background:#ffffff0c;border:1px solid var(--border);color:var(--text)}
-.danger{background:#fb71851a;color:#fda4af}
-.auth .btn{width:100%;margin-top:11px}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
-.user{display:flex;align-items:center;gap:11px;min-width:0}
-.avatar{width:43px;height:43px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;
- background:linear-gradient(135deg,var(--blue),var(--purple));font-weight:800}
-.user-info{min-width:0}
-.user-name{font-size:14px;font-weight:700;overflow-wrap:anywhere}
-.user-email{font-size:12px;color:var(--muted);overflow-wrap:anywhere;margin-top:4px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:22px}
-.stat{padding:18px;border-radius:17px;background:#111a2dce;border:1px solid var(--border)}
-.stat-label{font-size:12px;color:var(--muted)}
-.stat-value{font-size:24px;font-weight:800;margin:12px 0 5px;overflow-wrap:anywhere}
-.stat-icon{font-size:20px}
-.progress{height:6px;background:#ffffff12;border-radius:20px;overflow:hidden;margin-top:13px}
-.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s}
-.upload{border:1px dashed #6476a4a8;border-radius:17px;text-align:center;padding:25px 12px;
- background:#0a1222a6;transition:.2s;margin-bottom:13px;cursor:pointer}
-.upload:hover,.upload.over{border-color:var(--blue);background:#38bdf80c}
-.upload-icon{font-size:32px;margin-bottom:8px}
-.upload strong{font-size:14px}
-.upload p{color:var(--muted);font-size:12px;margin-top:7px;overflow-wrap:anywhere}
-.upload-name{color:#67e8f9}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 15px}
-.toolbar .field{margin:0;flex:1;min-width:150px}
-.toolbar select{max-width:180px}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.section-head h2{font-size:18px}
-.count{color:var(--muted);font-size:12px}
-.files{display:grid;grid-template-columns:1fr;gap:10px;margin-top:15px}
-.files.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-.file{display:flex;align-items:center;gap:12px;min-width:0;padding:13px;
- border:1px solid var(--border);border-radius:15px;background:#0a1221a8;transition:.2s}
-.file:hover{border-color:#38bdf85c;transform:translateY(-1px)}
-.files.grid .file{align-items:flex-start;flex-wrap:wrap}
-.file-icon{width:42px;height:42px;display:grid;place-items:center;flex-shrink:0;
- border-radius:12px;background:#38bdf812;font-size:22px}
+.auth{max-width:440px;margin:15px auto}
+.note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:12px}
+.userbar{display:flex;align-items:center;gap:12px;padding:13px;background:#14233b;border:1px solid #2c4664;border-radius:16px;margin-bottom:20px}
+.avatar{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--purple));font-weight:800}
+.userinfo{flex:1;min-width:0}
+.username{font-weight:700;overflow-wrap:anywhere}
+.email{font-size:12px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.logout{border:1px solid #693448;color:#fda4af;background:#351c2c;padding:9px 12px;border-radius:10px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat{padding:16px;background:#0c1528;border:1px solid #253650;border-radius:15px;min-width:0}
+.stat small{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+.stat strong{font-size:20px;overflow-wrap:anywhere}
+.dropzone{padding:28px 15px;text-align:center;border:1.5px dashed #41648c;background:#0c1a2d;border-radius:17px;cursor:pointer;margin-bottom:10px;transition:.2s}
+.dropzone:hover,.dropzone.over{border-color:var(--blue);background:#112941}
+.dropicon{font-size:34px;margin-bottom:8px}
+.dropzone p{font-size:13px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+.cyan{color:#7dd3fc;font-weight:700}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 12px}
+.toolbar input{flex:1;min-width:160px;margin:0}
+.toolbar select{padding:11px;border:1px solid #344361;background:#0b1426;color:var(--text);border-radius:11px}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 10px}
+.section-title h2{margin:0}
+.file-list{display:grid;grid-template-columns:1fr;gap:9px}
+.file-item{display:flex;align-items:center;gap:12px;padding:13px;background:#0c1528;border:1px solid #253650;border-radius:14px;min-width:0}
+.file-icon{font-size:25px}
 .file-meta{flex:1;min-width:0}
-.file-name{font-size:13px;font-weight:700;overflow-wrap:anywhere;line-height:1.5}
-.file-sub{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
-.file-actions{display:flex;gap:5px;flex-wrap:wrap}
-.action{border:1px solid var(--border);background:#ffffff08;color:#dbeafe;border-radius:8px;padding:7px 9px;font-size:12px}
-.action:hover{background:#38bdf81c}
-.action.del{color:#fda4af}
-.files.grid .file-meta{flex-basis:calc(100% - 55px)}
-.files.grid .file-actions{width:100%;margin-top:4px}
-.empty{text-align:center;padding:40px 10px;color:var(--muted);font-size:13px}
-.footer{text-align:center;font-size:11px;color:#65738f;margin-top:24px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,100px);
- opacity:0;transition:.25s;background:#151f34;border:1px solid var(--border);
- padding:13px 18px;border-radius:12px;z-index:20;max-width:90%;font-size:13px}
+.file-name{font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.file-sub{font-size:11px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}
+.file-actions{display:flex;gap:6px;flex-wrap:wrap}
+.mini{border:0;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:700}
+.download{background:#12344a;color:#7dd3fc}
+.delete{background:#3b202c;color:#fda4af}
+.empty{text-align:center;color:var(--muted);padding:25px 10px;border:1px dashed #344361;border-radius:14px;font-size:13px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,100px);opacity:0;transition:.25s;background:#101c30;border:1px solid #3b5575;border-radius:12px;padding:13px 18px;width:max-content;max-width:90%;z-index:10;font-size:13px;overflow-wrap:anywhere}
 .toast.show{transform:translate(-50%,0);opacity:1}
-.toast.error{border-color:var(--danger)}
-.modal{position:fixed;inset:0;background:#02040bdc;z-index:30;display:grid;place-items:center;padding:18px}
-.modal-box{width:min(900px,100%);height:min(85vh,750px);background:#0c1425;border:1px solid var(--border);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;border-bottom:1px solid var(--border)}
-.preview-body{flex:1;min-height:0;display:grid;place-items:center;padding:12px;overflow:auto}
-.preview-body img{max-width:100%;max-height:100%;object-fit:contain}
-.preview-body iframe{width:100%;height:100%;border:0;background:white}
-@media(max-width:600px){
- .app{padding:17px 12px 35px}
- .panel{padding:17px}
- .stats{grid-template-columns:1fr 1fr}
- .stat:last-child{grid-column:1/-1}
- .stat-value{font-size:21px}
- header{margin-bottom:20px}
- .brand-icon{width:42px;height:42px}
- h1{font-size:19px}
- .badge{display:none}
- .topbar{align-items:flex-start}
- .toolbar select{max-width:none;flex:1}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.toast.error{border-color:#fb7185;color:#fecdd3}
+.toast.success{border-color:#4ade80;color:#bbf7d0}
+footer{text-align:center;color:#71809d;font-size:11px;margin-top:22px}
+@media(min-width:650px){.file-list.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.app{padding:17px;border-radius:19px}h1{font-size:22px}.stats{gap:7px}.stat{padding:11px}.stat strong{font-size:17px}.file-item{gap:8px;padding:10px}.file-actions{flex-direction:column}.mini{padding:8px}.userbar{gap:8px}}
 </style>
 </head>
-<body>
-<div class="app">
-  <header>
-    <div class="brand">
-      <div class="brand-icon">☁</div>
-      <div><h1>MyCloud Mini</h1><small>YOUR PERSONAL CLOUD</small></div>
-    </div>
-    <span class="badge">✦ DARK NEON PRO</span>
-  </header>
 
-  <section id="authSection" class="panel auth">
+<body>
+<main class="app">
+  <header>
+    <div class="logo">☁️</div>
+    <div><h1>MyCloud Mini</h1><div style="font-size:12px;color:#9aa9c7;margin-top:4px">Your personal cloud workspace</div></div>
+  </header>
+  <p class="subtitle">Store, organize and access your files from anywhere.</p>
+
+  <section id="authSection" class="auth">
     <h2>Welcome to your cloud</h2>
-    <p class="muted">Sign in to access your personal files from anywhere.</p>
-    <input id="name" class="field" placeholder="Your full name (for signup)" autocomplete="name">
-    <input id="email" class="field" type="email" placeholder="Email address" autocomplete="email">
-    <input id="password" class="field" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
-    <button id="signupBtn" class="btn primary" onclick="signup()">Create account</button>
-    <button id="loginBtn" class="btn secondary" onclick="login()">Login</button>
-    <p class="muted" style="margin-top:14px">New account? Check your email if confirmation is enabled.</p>
+    <input id="name" type="text" placeholder="Your name (for new account)" autocomplete="name">
+    <input id="email" type="email" placeholder="Email address" autocomplete="email">
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="signupBtn" class="btn primary full" type="button">Create account</button>
+    <button id="loginBtn" class="btn ghost full" type="button">Login</button>
+    <p class="note">Existing account? Enter your email and password, then tap Login. New accounts may require email confirmation.</p>
   </section>
 
-  <main id="appSection" class="hidden">
-    <div class="topbar">
-      <div class="user">
-        <div class="avatar" id="avatar">?</div>
-        <div class="user-info">
-          <div class="user-name" id="userName">My account</div>
-          <div class="user-email" id="userEmail"></div>
-        </div>
-      </div>
-      <button class="btn secondary" onclick="logout()">↗ Logout</button>
+  <section id="appSection" class="hidden">
+    <div class="userbar">
+      <div class="avatar" id="avatar">?</div>
+      <div class="userinfo"><div id="userName" class="username">User</div><div id="userEmail" class="email"></div></div>
+      <button id="logoutBtn" class="logout" type="button">Logout</button>
     </div>
 
     <div class="stats">
-      <div class="stat"><div class="stat-icon">📁</div><div class="stat-label">Total files</div><div class="stat-value" id="fileCount">0</div><div class="muted">Files in your account</div></div>
-      <div class="stat"><div class="stat-icon">💾</div><div class="stat-label">Storage used</div><div class="stat-value" id="storageUsed">0 B</div><div class="muted">Listed files total</div></div>
-      <div class="stat"><div class="stat-icon">⚡</div><div class="stat-label">Cloud status</div><div class="stat-value" style="font-size:20px;color:var(--green)">● Connected</div><div class="progress"><span id="usageBar"></span></div><div class="muted" style="margin-top:7px">Usage indicator, not plan quota</div></div>
+      <div class="stat"><small>Total files</small><strong id="fileCount">0</strong></div>
+      <div class="stat"><small>Storage used</small><strong id="storageUsed">0 B</strong></div>
+      <div class="stat"><small>Account</small><strong style="font-size:15px">Active</strong></div>
     </div>
 
-    <section class="panel">
-      <div class="section-head"><h2>Upload files</h2><span class="count">Secure account storage</span></div>
-      <div class="upload" id="dropzone" role="button" tabindex="0">
-        <div class="upload-icon">📤</div>
-        <strong>Drop files here or <span style="color:var(--blue)">browse</span></strong>
-        <p id="dzText">Choose a file from your device</p>
-      </div>
-      <input id="file" type="file" class="hidden">
-      <button id="uploadBtn" class="btn primary" style="width:100%" onclick="uploadFile()">⬆ Upload file</button>
+    <div id="dropzone" class="dropzone">
+      <div class="dropicon">📤</div>
+      <p><span class="cyan">Click to choose a file</span> or drag and drop it here</p>
+      <p id="dzText">Your selected file will appear here.</p>
+    </div>
+    <input id="fileInput" type="file" class="hidden">
+    <button id="uploadBtn" class="btn primary full" type="button">Upload file</button>
 
-      <div class="toolbar">
-        <input id="search" class="field" placeholder="🔎 Search files..." oninput="renderFiles()">
-        <select id="filter" class="field" onchange="renderFiles()">
-          <option value="all">All file types</option>
-          <option value="image">Images</option>
-          <option value="pdf">PDF documents</option>
-          <option value="document">Documents</option>
-          <option value="video">Videos</option>
-          <option value="audio">Audio</option>
-          <option value="other">Other files</option>
-        </select>
-        <select id="sort" class="field" onchange="renderFiles()">
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="az">Name A–Z</option>
-          <option value="za">Name Z–A</option>
-          <option value="largest">Largest first</option>
-        </select>
-        <button class="btn secondary" id="viewBtn" onclick="toggleView()">▦ Grid view</button>
-        <button class="btn secondary" onclick="loadFiles()">↻ Refresh</button>
-      </div>
+    <div class="section-title"><h2>Your files</h2><button id="refreshBtn" class="btn ghost" type="button">↻ Refresh</button></div>
+    <div class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search your files...">
+      <select id="sortSelect" aria-label="Sort files">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="name">Name A–Z</option>
+        <option value="size">Largest first</option>
+      </select>
+      <button id="viewBtn" class="btn ghost" type="button">Grid view</button>
+    </div>
+    <div id="files" class="file-list"></div>
+  </section>
 
-      <div class="section-head">
-        <h2>Your files</h2><span class="count" id="visibleCount">0 files</span>
-      </div>
-      <div id="files" class="files"></div>
-    </section>
-  </main>
-  <div class="footer">MyCloud Mini • Personal cloud learning project • Avoid uploading sensitive files</div>
-</div>
-
+  <footer>MyCloud Mini · Learning prototype · Avoid uploading sensitive files.</footer>
+</main>
 <div id="toast" class="toast" role="status"></div>
-<div id="previewModal" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="modal-box">
-    <div class="modal-head"><strong id="previewTitle">File preview</strong><button class="btn secondary" onclick="closePreview()">✕ Close</button></div>
-    <div class="preview-body" id="previewBody"></div>
-  </div>
-</div>
 
 <script>
-const db = supabase.createClient(
-  "https://nylpeijudbjzocdfiyqe.supabase.co",
-  "sb_publishable_CPIurg7CNQRL2yVyyGb0cA_iQp5Sk21"
-);
+(() => {
+  "use strict";
 
-let user = null;
-let allFiles = [];
-let isGrid = false;
-let selectedFile = null;
-let previewUrl = null;
-let toastTimer = null;
+  const SUPABASE_URL = "https://nylpeijudbjzocdfiyqe.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_CPIurg7CNQRL2yVyyGb0cA_iQp5Sk21";
+  const BUCKET = "user-files";
 
-function toast(message,type=""){
-  const el=document.getElementById("toast");
-  el.textContent=message;
-  el.className="toast show "+type;
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.className="toast",3500);
-}
-function formatBytes(bytes){
-  if(bytes==null||!Number.isFinite(Number(bytes)))return "—";
-  bytes=Number(bytes);
-  if(bytes<1024)return bytes+" B";
-  if(bytes<1048576)return (bytes/1024).toFixed(1)+" KB";
-  if(bytes<1073741824)return (bytes/1048576).toFixed(1)+" MB";
-  return (bytes/1073741824).toFixed(2)+" GB";
-}
-function displayName(name){return name.replace(/^\d+_/,"")}
-function extension(name){return name.split(".").pop().toLowerCase()}
-function fileEmoji(name){
-  const e=extension(name);
-  if(["jpg","jpeg","png","gif","webp","svg","bmp"].includes(e))return "🖼️";
-  if(["mp4","mov","avi","mkv","webm"].includes(e))return "🎬";
-  if(["mp3","wav","ogg","m4a"].includes(e))return "🎵";
-  if(e==="pdf")return "📕";
-  if(["doc","docx","txt","md","rtf"].includes(e))return "📄";
-  if(["xls","xlsx","csv"].includes(e))return "📊";
-  if(["zip","rar","7z","tar","gz"].includes(e))return "📦";
-  if(["js","html","css","py","java","json"].includes(e))return "💻";
-  return "📁";
-}
-function category(name){
-  const e=extension(name);
-  if(["jpg","jpeg","png","gif","webp","svg","bmp"].includes(e))return "image";
-  if(e==="pdf")return "pdf";
-  if(["doc","docx","txt","md","rtf","xls","xlsx","csv","ppt","pptx"].includes(e))return "document";
-  if(["mp4","mov","avi","mkv","webm"].includes(e))return "video";
-  if(["mp3","wav","ogg","m4a"].includes(e))return "audio";
-  return "other";
-}
-function showSection(){
-  const loggedIn=!!user;
-  document.getElementById("authSection").classList.toggle("hidden",loggedIn);
-  document.getElementById("appSection").classList.toggle("hidden",!loggedIn);
-  if(!loggedIn)return;
-  const name=user.user_metadata?.full_name||user.email?.split("@")[0]||"User";
-  document.getElementById("userName").textContent=name;
-  document.getElementById("userEmail").textContent=user.email||"";
-  document.getElementById("avatar").textContent=name.trim().charAt(0).toUpperCase()||"?";
-}
-function setBusy(id,busy,busyText,normalText){
-  const b=document.getElementById(id);
-  b.disabled=busy;b.textContent=busy?busyText:normalText;
-}
-async function init(){
-  try{
-    const {data,error}=await db.auth.getSession();
-    if(error)throw error;
-    user=data.session?.user||null;
-    showSection();
-    if(user)await loadFiles();
-  }catch(e){toast(e.message||"Could not initialize account","error")}
-}
-async function signup(){
-  const name=document.getElementById("name").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  if(!name||!email||!password)return toast("Enter your name, email and password","error");
-  if(password.length<6)return toast("Password must be at least 6 characters","error");
-  setBusy("signupBtn",true,"Creating account...","Create account");
-  try{
-    const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name}}});
-    if(error)throw error;
-    user=data.session?.user||null;showSection();
-    if(user){toast("Account created!");await loadFiles()}
-    else toast("Check your email to confirm, then log in.");
-  }catch(e){toast(e.message||"Signup failed","error")}
-  finally{setBusy("signupBtn",false,"Creating account...","Create account")}
-}
-async function login(){
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  if(!email||!password)return toast("Enter email and password","error");
-  setBusy("loginBtn",true,"Logging in...","Login");
-  try{
-    const {data,error}=await db.auth.signInWithPassword({email,password});
-    if(error)throw error;
-    user=data.user;showSection();toast("Welcome back!");
-    await loadFiles();
-  }catch(e){toast(e.message||"Login failed","error")}
-  finally{setBusy("loginBtn",false,"Logging in...","Login")}
-}
-async function logout(){
-  try{
-    const {error}=await db.auth.signOut();
-    if(error)throw error;
-    user=null;allFiles=[];showSection();renderFiles();updateStats();toast("Logged out");
-  }catch(e){toast(e.message||"Logout failed","error")}
-}
+  const $ = id => document.getElementById(id);
+  let db = null;
+  let user = null;
+  let files = [];
+  let gridView = false;
+  let toastTimer = null;
 
-/* Upload and drag-and-drop */
-const dz=document.getElementById("dropzone");
-const fileInput=document.getElementById("file");
-dz.addEventListener("click",()=>fileInput.click());
-dz.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fileInput.click()}});
-dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});
-dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
-dz.addEventListener("drop",e=>{
-  e.preventDefault();dz.classList.remove("over");
-  const f=e.dataTransfer.files?.[0];
-  if(f){selectedFile=f;showSelectedFile()}
-});
-fileInput.addEventListener("change",()=>{
-  selectedFile=fileInput.files?.[0]||null;showSelectedFile();
-});
-function showSelectedFile(){
-  document.getElementById("dzText").textContent=selectedFile
-    ?selectedFile.name+" • "+formatBytes(selectedFile.size)
-    :"Choose a file from your device";
-}
-async function uploadFile(){
-  if(!user)return toast("Please log in first","error");
-  const file=selectedFile||fileInput.files?.[0];
-  if(!file)return toast("Choose a file first","error");
-  setBusy("uploadBtn",true,"Uploading…","⬆ Upload file");
-  try{
-    const safeName=file.name.replace(/[^\w.\- ]/g,"_");
-    const path=user.id+"/"+Date.now()+"_"+safeName;
-    const {error}=await db.storage.from("user-files").upload(path,file,{upsert:false});
-    if(error)throw error;
-    toast("Upload successful!");
-    selectedFile=null;fileInput.value="";showSelectedFile();
-    await loadFiles();
-  }catch(e){toast(e.message||"Upload failed","error")}
-  finally{setBusy("uploadBtn",false,"Uploading…","⬆ Upload file")}
-}
-
-/* File list and dashboard */
-async function loadFiles(){
-  if(!user)return;
-  const box=document.getElementById("files");
-  box.innerHTML='<div class="empty">Loading your files…</div>';
-  try{
-    const {data,error}=await db.storage.from("user-files").list(user.id,{
-      limit:100,sortBy:{column:"created_at",order:"desc"}
-    });
-    if(error)throw error;
-    allFiles=(data||[]).filter(f=>f.id);
-    updateStats();renderFiles();
-  }catch(e){
-    box.innerHTML='<div class="empty">Could not load files. Check your Storage policies.</div>';
-    toast(e.message||"Could not load files","error");
+  function toast(message, type = "") {
+    const box = $("toast");
+    box.textContent = message;
+    box.className = "toast show " + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => box.className = "toast", 4000);
   }
-}
-function updateStats(){
-  const total=allFiles.reduce((sum,f)=>sum+Number(f.metadata?.size||0),0);
-  document.getElementById("fileCount").textContent=allFiles.length;
-  document.getElementById("storageUsed").textContent=formatBytes(total);
-  // Visual indicator only; this is not the account's storage quota.
-  document.getElementById("usageBar").style.width=total===0?"0%":Math.min(100,Math.max(4,Math.log10(total+1)*12))+"%";
-}
-function renderFiles(){
-  const box=document.getElementById("files");
-  const query=document.getElementById("search").value.trim().toLowerCase();
-  const filter=document.getElementById("filter").value;
-  const sort=document.getElementById("sort").value;
-  let files=allFiles.filter(f=>{
-    const name=displayName(f.name);
-    return name.toLowerCase().includes(query)&&(filter==="all"||category(name)===filter);
-  });
-  files.sort((a,b)=>{
-    if(sort==="az")return displayName(a.name).localeCompare(displayName(b.name));
-    if(sort==="za")return displayName(b.name).localeCompare(displayName(a.name));
-    if(sort==="largest")return Number(b.metadata?.size||0)-Number(a.metadata?.size||0);
-    const da=new Date(a.created_at||0).getTime(),dbb=new Date(b.created_at||0).getTime();
-    return sort==="oldest"?da-dbb:dbb-da;
-  });
-  document.getElementById("visibleCount").textContent=files.length+" file"+(files.length===1?"":"s");
-  box.classList.toggle("grid",isGrid);
-  document.getElementById("viewBtn").textContent=isGrid?"☰ List view":"▦ Grid view";
-  box.replaceChildren();
-  if(!files.length){
-    const empty=document.createElement("div");empty.className="empty";
-    empty.t
+
+  function errorMessage(error) {
+    return error?.message || "Something went wrong. Please try again.";
+  }
+
+  function formatBytes(bytes) {
+    if (!Number.isFinite(Number(bytes))) return "0 B";
+    const n = Number(bytes);
+    if (n < 1024) return n + " B";
+    if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
+    if (n < 1073741824) return (n / 1048576).toFixed(1) + " MB";
+    return (n / 1073741824).toFixed(2) + " GB";
+  }
+
+  function safeDisplayName(fileName) {
+    // Supports both legacy timestamp_filename and uploader__timestamp_filename.
+    return fileName.replace(/^[^/]+\/?/, "").replace(/^[^_]+__\d+_/, "").replace(/^\d+_/, "");
+  }
+
+  function emoji(name) {
+    const ext = name.split(".").pop().toLowerCase();
+    if (["png","jpg","jpeg","gif","webp","svg"].includes(ext)) return "🖼️";
+    if (["mp4","mov","mkv","avi"].includes(ext)) return "🎬";
+    if (["mp3","wav","m4a","ogg"].includes(ext)) return "🎵";
+    if (ext === "pdf") return "📕";
+    if (["doc","docx","txt","md"].includes(ext)) return "📄";
+    if (["xls","xlsx","csv"].includes(ext)) return "📊";
+    if (["zip","rar","7z"].includes(ext)) return "📦";
+    return "📁";
+  }
+
+  function setBusy(button, busy, busyText, normalText) {
+    button.disabled = busy;
+    button.textContent = busy ? busyText : normalText;
+  }
+
+  function showSection() {
+    const loggedIn = Boolean(user);
+    $("authSection").classList.toggle("hidden", loggedIn);
+    $("appSection").classList.toggle("hidden", !loggedIn);
+
+    if (loggedIn) {
+      const email = user.email || "";
+      const name = user.user_metadata?.full_name || email.split("@")[0] || "User";
+      $("userName").textContent = name;
+      $("userEmail").textContent = email;
+      $("avatar").textContent = (name[0] || "U").toUpperCase();
+    }
+  }
+
+  async function login() {
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    if (!email || !password) {
+      toast("Enter your email and password first.", "error");
+      return;
+    }
+    const btn = $("loginBtn");
+    setBusy(btn, true, "Logging in...", "Login");
+    try {
+      if (!db) throw new Error("Supabase did not load. Check your internet and refresh.");
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (!data.user) throw new Error("Login did not return a user. Try again.");
+      user = data.user;
+      showSection();
+      toast("Login successful!", "success");
+      await loadFiles();
+    } catch (error) {
+      console.error("Login error:", error);
+      toast(errorMessage(error), "error");
+    } finally {
+      setBusy(btn, false, "Logging in...", "Login");
+    }
+  }
+
+  async function signup() {
+    const name = $("name").value.trim();
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    if (!name || !email || !password) {
+      toast("Enter your name, email and password.", "error");
+      return;
+    }
+    if (password.length < 6) {
+      toast("Password must be at least 6 characters.", "error");
+      return;
+    }
+    const btn = $("signupBtn");
+    setBusy(btn, true, "Creating account...", "Create account");
+    try {
+      if (!db) throw new Error("Supabase did not load. Check your internet and refresh.");
+      const { data, error } = await db.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: name } }
+      });
+      if (error) throw error;
+      if (data.user && data.session) {
+        user = data.user;
+        showSection();
+        toast("Account created successfully!", "success");
+        await loadFiles();
+      } else {
+        toast("Account created. Confirm your email, then log in.", "success");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast(errorMessage(error), "error");
+    } finally {
+      setBusy(btn, false, "Creating account...", "Create account");
+    }
+  }
+
+  async function logout() {
+    try {
+      const { error } = await db.auth.signOut();
+      if (error) throw error;
+      user = null;
+      files = [];
+      $("files").replaceChildren();
+      showSection();
+      toast("Logged out.", "success");
+    } catch (error) {
+      toast(errorMessage(error), "error");
+    }
+  }
+
+  async function loadFiles() {
+    if (!user || !db) return;
+    $("files").innerHTML = '<div class="empty">Loading your files...</div>';
+    try {
+      const { data, error } = await db.storage.from(BUCKET).list(user.id, {
+        limit: 100,
+        sortBy: { column: "created_at", order: "desc" }
+      });
+      if (error) throw error;
+
+      files = (data || []).filter(file => file.id && file.name);
+      renderFiles();
+    } catch (error) {
+      console.error("Load files error:", error);
+      $("files").innerHTML = '<div class="empty">Could not load files. Check Storage policies.</div>';
+      toast(errorMessage(error), "error");
+    }
+  }
+
+  function renderFiles() {
+    const box = $("files");
+    box.replaceChildren();
+
+    const query = $("searchInput").value.trim().toLowerCase();
+    const sorted = files.filter(file => safeDisplayName(file.name).toLowerCase().includes(query));
+
+    const sort = $("sortSelect").value;
+    sorted.sort((a, b) => {
+      if (sort === "name") return safeDisplayName(a.name).localeCompare(safeDisplayName(b.name));
+      if (sort === "size") return (b.metadata?.size || 0) - (a.metadata?.size || 0);
+      const aTime = new Date(a.created_at || 0).getTime();
+      const bTime = new Date(b.created_at || 0).getTime();
+      return sort === "oldest" ? aTime - bTime : bTime - aTime;
+    });
+
+    $("fileCount").textContent = files.length;
+    $("storageUsed").textContent = formatBytes(files.reduce((sum, f) => sum + (Number(f.metadata?.size) || 0), 0));
+    box.classList.toggle("grid", gridView);
+
+    if (!sorted.length) {
+      box.innerHTML = '<div class="empty">' + (query ? "No matching files found." : "No files yet. Upload your first file!") + '</div>';
+      return;
+    }
+
+    sorted.forEach(file => {
+      const row = document.createElement("div");
+      row.className = "file-item";
+
+      const icon = document.createElement("div");
+      icon.className = "file-icon";
+      icon.textContent = emoji(safeDisplayName(file.name));
+
+      const meta = document.createElement("div");
+      meta.className = "file-meta";
+
+      const name = document.createElement("div");
+      name.className = "file-name";
+      name.textContent = safeDisplayName(file.name);
+
+      const sub = document.createElement("div");
+      sub.className = "file-sub";
+      const date = file.created_at ? new Date(file.created_at).toLocaleDateString() : "Date unavailable";
+      const uploader = user.user_metadata?.full_name || user.email?.split("@")[0] || "You";
+      sub.textContent = formatBytes(file.metadata?.size) + " · " + date + " · Uploaded by " + uploader;
+
+      meta.append(name, sub);
+
+      const actions = document.createElement("div");
+      actions.className = "file-actions";
+
+      const dl = document.createElement("button");
+      dl.type = "button";
+      dl.className = "mini download";
+      dl.textContent = "↓ Download";
+      dl.addEventListener("click", () => downloadFile(file.name));
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "mini delete";
+      del.textContent = "✕ Delete";
+      del.addEventListener("click", () => deleteFile(file.name));
+
+      actions.append(dl, del);
+      row.append(icon, meta, actions);
+      box.append(row);
+    });
+  }
+
+  async function uploadFile() {
+    if (!user) {
+      toast("Please log in first.", "error");
+      return;
+    }
+    const input = $("fileInput");
+    const file = input.files?.[0];
+    if (!file) {
+      toast("Choose a file first.", "error");
+      return;
+    }
+
+    const btn = $("uploadBtn");
+    setBusy(btn, true, "Uploading...", "Upload file");
+    try {
+      const safeName = file.name.replace(/[^\w.\- ]/g, "_");
+      const uploader = (user.user_metadata?.full_name || user.email?.split("@")[0] || "user")
+        .trim().replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "") || "user";
+
+      // Keep the UID folder for existing Supabase Storage policies.
+      // The uploader label is included in new object names.
+      const path = user.id + "/" + uploader + "__" + Date.now() + "_" + safeName;
+      const { error } = await db.storage.from(BUCKET).upload(path, file, { upsert: false });
+      if (error) throw error;
+
+      input.value = "";
+      $("dzText").textContent = "Your selected file will appear here.";
+      toast("Upload successful!", "success");
+      await loadFiles();
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast(errorMessage(error), "error");
+    } finally {
+      setBusy(btn, false, "Uploading...", "Upload file");
+    }
+  }
+
+  async function downloadFile(fileName) {
+    try {
+      const { data, error } = await db.storage.from(BUCKET).download(user.id + "/" + fileName);
+      if (error) throw error;
+      const url = URL.createObjectURL(data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = safeDisplayName(fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    } catch (error) {
+      console.error("Download error:", error);
+      toast(errorMessage(error), "error");
+    }
+  }
+
+  async function deleteFile(fileName) {
+    if (!confirm("Delete this file permanently?")) return;
+    try {
+      const { error } = await db.storage.from(BUCKET).remove([user.id + "/" + fileName]);
+      if (error) throw error;
+      toast("File deleted.", "success");
+      await loadFiles();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast(errorMessage(error), "error");
+    }
+  }
+
+  function setup() {
+    // Explicit listeners prevent inline onclick/global-scope issues.
+    $("loginBtn").addEventListener("click", login);
+    $("signupBtn").addEventListener("click", signup);
+    $("logoutBtn").addEventListener("click", logout);
+    $("uploadBtn").addEventListener("click", uploadFile);
+    $("refreshBtn").addEventListener("click", loadFiles);
+    $("searchInput").addEventListener("input", renderFiles);
+    $("sortSelect").addEventListener("change", renderFiles);
+    $("viewBtn").addEventListener("click", () => {
+      gridView = !gridView;
+      $("viewBtn").textContent = gridView ? "List view" : "Grid view";
+      renderFiles();
+    });
+
+    const dropzone = $("dropzone");
+    const fileInput = $("fileInput");
+    dropzone.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      $("dzText").textContent = file ? file.name + " · " + formatBytes(file.size) : "Your selected file will appear here.";
+    });
+    dropzone.addEventListener("dragover", event => {
+      event.preventDefault();
+      dropzone.classList.add("over");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("over"));
+    dropzone.addEventListener("drop", event => {
+      event.preventDefault();
+      dropzone.classList.remove("over");
+      const dt = event.dataTransfer;
